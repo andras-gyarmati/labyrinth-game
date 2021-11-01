@@ -9,7 +9,7 @@ body {
 }
 
 #grid > .row {
-    height: 100px;
+    height: 85px;
     margin: 2px;
 }
 
@@ -17,10 +17,34 @@ body {
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    width: 100px;
-    height: 100px;
-    background-color: skyblue;
+    width: 85px;
+    height: 85px;
     display: inline-block;
     border-radius: 10px;
     margin: 1px;
+    border-color: rgb(78, 0, 0);
+}
+
+#manual {
+    display: none;
+}
+
+#grid {
+    display: block; /* none */
+}
+
+.cell {
+    background-color: rgb(193, 225, 247);
+}
+
+.path-cell {
+    background-color: rgb(168, 252, 196);
+}
+
+.border-cell {
+    background-color: #fff;
+}
+
+.arrow-cell {
+    background-color: rgb(239, 255, 13);
 }

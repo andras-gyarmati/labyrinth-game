@@ -15,10 +15,24 @@
             játékosonként hány kincskártya (1-(24/játékosok száma)) --
             alapértelmezetten 2
         </div>
-        <button>Egy start gomb megnyomásával megjelenik a játéktér.</button>
-        <button>
+        <button id="grid-button" onclick="showGrid()">
+            Egy start gomb megnyomásával megjelenik a játéktér.
+        </button>
+        <button onclick="toggleManual()">
             Egy másik gomb megnyomásával a játék leírása jelenik meg.
         </button>
+        <div id="manual">
+            A katakomba szobáit egy 7x7-es négyzetrács cellái jelképezik. Minden
+            szobában adott, hogy hány falán van ajtó. Ha két szomszédos szoba
+            érintkező falán egy-egy ajtó van, akkor át lehet menni egyik
+            szobából a másikba. A négyzetrács páros sorait és oszlopait el lehet
+            tolni, a többi szoba végig rögzített a játék során. Az eltolásokkal
+            az ajtókon keresztül utak nyílnak a szobák között, így lehet eljutni
+            a kincsekhez. Mindegyik kérő arra törekszik, hogy a katakomba
+            szobáinak ötletes eltolásával eljusson a kincsekhez. Aki elsőként
+            találja meg mindahányat és kiindulópontjára sikeresen visszaérkezik
+            az a nyertes.
+        </div>
         <div id="grid"></div>
 
         <script src="script.js"></script>
