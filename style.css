@@ -1,0 +1,26 @@
+body {
+    font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+}
+
+#grid > .row,
+#grid > .row > .col {
+    margin: 0;
+    padding: 0;
+}
+
+#grid > .row {
+    height: 100px;
+    margin: 2px;
+}
+
+#grid > .row > .col {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    width: 100px;
+    height: 100px;
+    background-color: skyblue;
+    display: inline-block;
+    border-radius: 10px;
+    margin: 1px;
+}
