@@ -21,6 +21,7 @@ class Treasure {
     }
 }
 
+const cellSize = 85;
 const treasures = [...Array(24).keys()].map((x) => new Treasure(x));
 const grid = document.querySelector("#grid");
 const gridSize = 7;
@@ -43,6 +44,19 @@ let gridData = [];
 
 let players = [];
 
+function genCells() {
+    for (let i = 0; i < initialGridData.length; i++) {
+        let row = initialGridData[i];
+        gridData[i] = [];
+        for (let j = 0; j < row.length; j++) {
+            let cellCode = row[j];
+            gridData[i][j] = new Cell(cellCode);
+        }
+    }
+}
+
+genCells();
+
 function isFixed(x, y) {
     return x % 2 == 1 && y % 2 == 1;
 }
@@ -50,16 +64,38 @@ function isFixed(x, y) {
 function cellClicked(event) {
     let cell = event.target;
     let colIndex = cell.dataset.colIndex;
+    let rowIndex = cell.dataset.rowIndex;
     let tmpCell;
-    if (cell.dataset.rowIndex == -1) {
+    if (rowIndex == -1) {
         tmpCell = gridData[gridSize - 1][colIndex];
         for (let i = gridSize - 1; i > 0; i--) {
             gridData[i][colIndex] = gridData[i - 1][colIndex];
         }
         gridData[0][colIndex] = extraCell;
         extraCell = tmpCell;
+    } else if (rowIndex == gridSize) {
+        tmpCell = gridData[0][colIndex];
+        for (let i = 0; i < gridSize - 1; i++) {
+            gridData[i][colIndex] = gridData[i + 1][colIndex];
+        }
+        gridData[gridSize - 1][colIndex] = extraCell;
+        extraCell = tmpCell;
+    } else if (colIndex == -1) {
+        tmpCell = gridData[rowIndex][gridSize - 1];
+        for (let i = gridSize - 1; i > 0; i--) {
+            gridData[rowIndex][i] = gridData[rowIndex][i - 1];
+        }
+        gridData[rowIndex][0] = extraCell;
+        extraCell = tmpCell;
+    } else if (colIndex == gridSize) {
+        tmpCell = gridData[rowIndex][0];
+        for (let i = 0; i < gridSize - 1; i++) {
+            gridData[rowIndex][i] = gridData[rowIndex][i + 1];
+        }
+        gridData[rowIndex][gridSize - 1] = extraCell;
+        extraCell = tmpCell;
     }
-    initCells();
+    drawGrid();
 }
 
 function onArrowCellMouseEnter(el, cell) {
@@ -81,67 +117,62 @@ function onArrowCellMouseLeave(el) {
     el.classList.remove("cell");
 }
 
-function initCells() {
+// todo: add element to the cell object and move them around when cells are moved in the underlaying griddata structure
+
+function drawGrid() {
     grid.innerHTML = "";
     for (let rowIndex = -1; rowIndex <= gridSize; rowIndex++) {
-        let row = document.createElement("div");
-        row.classList.add("row");
-        grid.appendChild(row);
-        if (0 <= rowIndex && rowIndex < gridSize) {
-            gridData[rowIndex] = [];
-        }
-
         for (let colIndex = -1; colIndex <= gridSize; colIndex++) {
-            let col = document.createElement("div");
-            col.classList.add("col");
-            col.dataset.rowIndex = rowIndex;
-            col.dataset.colIndex = colIndex;
+            let cellEm = document.createElement("div");
+            cellEm.classList.add("cell");
+            cellEm.dataset.rowIndex = rowIndex;
+            cellEm.dataset.colIndex = colIndex;
+            cellEm.style.position = "absolute"
+            cellEm.style.top = `${(rowIndex + 1) * cellSize}px`
+            cellEm.style.left = `${(colIndex + 1) * cellSize}px`
             if (
                 0 <= rowIndex &&
                 rowIndex < gridSize &&
                 0 <= colIndex &&
                 colIndex < gridSize
             ) {
-                let cell = new Cell(initialGridData[rowIndex][colIndex]);
-                gridData[rowIndex][colIndex] = cell;
-                col.style.borderStyle = cell.sides
+                let cell = gridData[rowIndex][colIndex];
+                cellEm.style.borderStyle = cell.sides
                     .map((x) => (x === "1" ? "none" : "solid"))
                     .join(" ");
-                col.style.borderWidth = "15px";
-                col.classList.add("cell");
+                cellEm.style.borderWidth = "15px";
             } else {
-                col.classList.add("border-cell");
+                cellEm.classList.add("border-cell");
                 if (
                     Math.abs(rowIndex % 2) === 1 &&
                     Math.abs(colIndex % 2) === 1 &&
                     ((rowIndex !== -1 && rowIndex !== gridSize) ||
                         (colIndex !== -1 && colIndex !== gridSize))
                 ) {
-                    col.classList.add("arrow-cell");
-                    col.addEventListener("mouseenter", () =>
-                        onArrowCellMouseEnter(col, null)
+                    cellEm.classList.add("arrow-cell");
+                    cellEm.addEventListener("mouseenter", () =>
+                        onArrowCellMouseEnter(cellEm, null)
                     );
-                    col.addEventListener("mouseleave", () =>
-                        onArrowCellMouseLeave(col)
+                    cellEm.addEventListener("mouseleave", () =>
+                        onArrowCellMouseLeave(cellEm)
                     );
-                    col.addEventListener("contextmenu", (e) => {
+                    cellEm.addEventListener("contextmenu", (e) => {
                         e.preventDefault();
                         rotateCell(extraCell);
-                        onArrowCellMouseEnter(col, null);
+                        onArrowCellMouseEnter(cellEm, null);
                     });
                 }
             }
 
-            col.addEventListener("click", cellClicked);
+            cellEm.addEventListener("click", cellClicked);
 
-            row.appendChild(col);
+            grid.appendChild(cellEm);
         }
     }
 }
 
 function toggleManual() {
     let el = document.querySelector("#manual");
-    console.log(el.style.display);
     if (el.style.display === "block") {
         el.style.display = "none";
     } else {
@@ -165,4 +196,4 @@ function rotateCell(cell) {
     cell.sides.push(shifted);
 }
 
-initCells();
+drawGrid();

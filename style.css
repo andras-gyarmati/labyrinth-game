@@ -2,18 +2,11 @@ body {
     font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
 }
 
-#grid > .row,
-#grid > .row > .col {
-    margin: 0;
-    padding: 0;
+#grid {
+    position: relative;
 }
 
-#grid > .row {
-    height: 85px;
-    margin: 2px;
-}
-
-#grid > .row > .col {
+#grid > .cell {
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -21,8 +14,10 @@ body {
     height: 85px;
     display: inline-block;
     border-radius: 10px;
-    margin: 1px;
     border-color: rgb(78, 0, 0);
+    background-color: rgb(193, 225, 247);
+    transition: all 1s ease;
+    -webkit-transition: all 1s ease;
 }
 
 #manual {
@@ -31,10 +26,6 @@ body {
 
 #grid {
     display: block; /* none */
-}
-
-.cell {
-    background-color: rgb(193, 225, 247);
 }
 
 .path-cell {
