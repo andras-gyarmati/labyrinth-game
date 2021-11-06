@@ -6,16 +6,22 @@ body {
     position: relative;
 }
 
-#grid > .cell {
+.cell {
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    width: 85px;
-    height: 85px;
+    width: 83px;
+    height: 83px;
     display: inline-block;
     border-radius: 10px;
+}
+
+.grid-cell {
     border-color: rgb(78, 0, 0);
     background-color: rgb(193, 225, 247);
+}
+
+.animated-cell {
     transition: all 1s ease;
     -webkit-transition: all 1s ease;
 }
@@ -30,10 +36,6 @@ body {
 
 .path-cell {
     background-color: rgb(168, 252, 196);
-}
-
-.border-cell {
-    background-color: #fff;
 }
 
 .arrow-cell {
