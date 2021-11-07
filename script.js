@@ -80,22 +80,28 @@ function arrowCellClicked(event) {
         tmpCell = gridData[0][colIndex];
         for (let i = 0; i < gridSize - 1; i++) {
             gridData[i][colIndex] = gridData[i + 1][colIndex];
+            moveCell(i, colIndex);
         }
         gridData[gridSize - 1][colIndex] = extraCell;
+        moveCell(gridSize - 1, colIndex);
         extraCell = tmpCell;
     } else if (colIndex == -1) {
         tmpCell = gridData[rowIndex][gridSize - 1];
         for (let i = gridSize - 1; i > 0; i--) {
             gridData[rowIndex][i] = gridData[rowIndex][i - 1];
+            moveCell(rowIndex, i);
         }
         gridData[rowIndex][0] = extraCell;
+        moveCell(rowIndex, 0);
         extraCell = tmpCell;
     } else if (colIndex == gridSize) {
         tmpCell = gridData[rowIndex][0];
         for (let i = 0; i < gridSize - 1; i++) {
             gridData[rowIndex][i] = gridData[rowIndex][i + 1];
+            moveCell(rowIndex, i);
         }
         gridData[rowIndex][gridSize - 1] = extraCell;
+        moveCell(rowIndex, gridSize - 1);
         extraCell = tmpCell;
     }
 }
@@ -104,7 +110,7 @@ function onArrowCellMouseEnter(el) {
     setCellEmPos(extraCell.cellEm, el.dataset.rowIndex, el.dataset.colIndex);
 }
 
-function onArrowCellMouseLeave(el) {
+function onArrowCellMouseLeave() {
     setCellEmPos(extraCell.cellEm, -1, -1);
 }
 
@@ -127,11 +133,15 @@ function isGridCell(rowIndex, colIndex) {
     return 0 <= rowIndex && rowIndex < gridSize && 0 <= colIndex && colIndex < gridSize;
 }
 
+function setCellEmBorders(cellEm, sides) {
+    cellEm.style.borderStyle = sides.map((x) => (x === "1" ? "none" : "solid")).join(" ");
+}
+
 function createGridCell(rowIndex, colIndex, sides) {
     let cellEm = createCellEm(rowIndex, colIndex);
     cellEm.classList.add("grid-cell");
     cellEm.classList.add("animated-cell");
-    cellEm.style.borderStyle = sides.map((x) => (x === "1" ? "none" : "solid")).join(" ");
+    setCellEmBorders(cellEm, sides);
     cellEm.style.borderWidth = "15px";
     return cellEm;
 }
@@ -146,10 +156,13 @@ function isArrowCell(rowIndex, colIndex) {
 
 function createArrowCell(rowIndex, colIndex) {
     let cellEm = createCellEm(rowIndex, colIndex);
-    cellEm.addEventListener("click", arrowCellClicked);
+    cellEm.addEventListener("click", (e) => {
+        arrowCellClicked(e);
+        onArrowCellMouseLeave();
+    });
     cellEm.classList.add("arrow-cell");
-    cellEm.addEventListener("mouseenter", () => onArrowCellMouseEnter(cellEm));
-    cellEm.addEventListener("mouseleave", () => onArrowCellMouseLeave(cellEm));
+    // cellEm.addEventListener("mouseenter", () => onArrowCellMouseEnter(cellEm));
+    // cellEm.addEventListener("mouseleave", () => onArrowCellMouseLeave());
     cellEm.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         rotateCell(extraCell);
@@ -197,6 +210,7 @@ function initPlayers() {
 function rotateCell(cell) {
     let shifted = cell.sides.shift();
     cell.sides.push(shifted);
+    setCellEmBorders(cell.cellEm, cell.sides);
 }
 
 drawGrid();
