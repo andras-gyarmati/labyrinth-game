@@ -6,7 +6,7 @@ const GameStates = Object.freeze({
 class Cell {
     constructor(code, rowIndex, colIndex) {
         this.sides = code.split("");
-        this.cellEm = createCellEm(rowIndex, colIndex);
+        this.cellEm = createGridCell(rowIndex, colIndex, this.sides);
     }
 }
 
@@ -37,20 +37,17 @@ const initialGridData = [
 ];
 let playerCount = 1; // todo: from user input
 let treasureCount = 1; // todo: from user input
-// amikor a nyil fole megyunk akkor beallitjuk oda az extranak a pozijat ha lemegyunk rola akkor meg visszaallitjuk arra a helyre ahol az extranak
-// lennie kell, csak a belsok legyenek rendes jatek cellak, a nyilasokra mas eventlistener kene
-// legyen szepen elkulonitve minden
 let extraCell = new Cell("0110", -1, -1);
 let gridData = [];
 let players = [];
 
 function genCells() {
-    for (let i = 0; i < initialGridData.length; i++) {
-        let row = initialGridData[i];
-        gridData[i] = [];
-        for (let j = 0; j < row.length; j++) {
-            let cellCode = row[j];
-            gridData[i][j] = new Cell(cellCode);
+    for (let rowIndex = 0; rowIndex < initialGridData.length; rowIndex++) {
+        let row = initialGridData[rowIndex];
+        gridData[rowIndex] = [];
+        for (let colIndex = 0; colIndex < row.length; colIndex++) {
+            let cellCode = row[colIndex];
+            gridData[rowIndex][colIndex] = new Cell(cellCode, rowIndex, colIndex);
         }
     }
 }
@@ -65,7 +62,7 @@ function moveCell(rowIndex, colIndex) {
     setCellEmPos(gridData[rowIndex][colIndex].cellEm, rowIndex, colIndex);
 }
 
-function cellClicked(event) {
+function arrowCellClicked(event) {
     let cell = event.target;
     let colIndex = cell.dataset.colIndex;
     let rowIndex = cell.dataset.rowIndex;
@@ -103,25 +100,15 @@ function cellClicked(event) {
     }
 }
 
-function onArrowCellMouseEnter(el, cell) {
-    if (cell === null) cell = extraCell;
-    el.style.borderStyle = cell.sides.map((x) => (x === "1" ? "none" : "solid")).join(" ");
-    el.style.borderWidth = "15px";
-    el.style.borderWidth = "15px";
-    el.classList.remove("arrow-cell");
-    el.classList.add("cell");
+function onArrowCellMouseEnter(el) {
+    setCellEmPos(extraCell.cellEm, el.dataset.rowIndex, el.dataset.colIndex);
 }
 
 function onArrowCellMouseLeave(el) {
-    el.style.borderStyle = "";
-    el.classList.add("arrow-cell");
+    setCellEmPos(extraCell.cellEm, -1, -1);
 }
 
-// todo: add element to the cell object and move them around when cells are moved in the underlaying griddata structure
-// extracellt is kezelni kell cellEm-el egyutt meg minden, nem kellenek bordercellek csak arrowcellek
-
 function setCellEmPos(cellEm, rowIndex, colIndex) {
-    console.log(`${rowIndex} ${colIndex}`);
     cellEm.dataset.rowIndex = rowIndex;
     cellEm.dataset.colIndex = colIndex;
     cellEm.style.top = `${(parseInt(rowIndex) + 1) * cellSize}px`;
@@ -133,7 +120,6 @@ function createCellEm(rowIndex, colIndex) {
     cellEm.classList.add("cell");
     cellEm.style.position = "absolute";
     setCellEmPos(cellEm, rowIndex, colIndex);
-    cellEm.addEventListener("click", cellClicked);
     return cellEm;
 }
 
@@ -141,14 +127,15 @@ function isGridCell(rowIndex, colIndex) {
     return 0 <= rowIndex && rowIndex < gridSize && 0 <= colIndex && colIndex < gridSize;
 }
 
-function setupGridCell(rowIndex, colIndex, cellEm) {
+function createGridCell(rowIndex, colIndex, sides) {
+    let cellEm = createCellEm(rowIndex, colIndex);
     cellEm.classList.add("grid-cell");
     cellEm.classList.add("animated-cell");
-    let cell = gridData[rowIndex][colIndex];
-    cellEm.style.borderStyle = cell.sides.map((x) => (x === "1" ? "none" : "solid")).join(" ");
+    cellEm.style.borderStyle = sides.map((x) => (x === "1" ? "none" : "solid")).join(" ");
     cellEm.style.borderWidth = "15px";
-    cell.cellEm = cellEm;
+    return cellEm;
 }
+
 function isArrowCell(rowIndex, colIndex) {
     return (
         Math.abs(rowIndex % 2) === 1 &&
@@ -156,27 +143,31 @@ function isArrowCell(rowIndex, colIndex) {
         ((rowIndex !== -1 && rowIndex !== gridSize) || (colIndex !== -1 && colIndex !== gridSize))
     );
 }
-function setupArrowCells(cellEm) {
+
+function createArrowCell(rowIndex, colIndex) {
+    let cellEm = createCellEm(rowIndex, colIndex);
+    cellEm.addEventListener("click", arrowCellClicked);
     cellEm.classList.add("arrow-cell");
-    cellEm.addEventListener("mouseenter", () => onArrowCellMouseEnter(cellEm, null));
+    cellEm.addEventListener("mouseenter", () => onArrowCellMouseEnter(cellEm));
     cellEm.addEventListener("mouseleave", () => onArrowCellMouseLeave(cellEm));
     cellEm.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         rotateCell(extraCell);
-        onArrowCellMouseEnter(cellEm, null);
     });
+    return cellEm;
 }
 
 function drawGrid() {
     grid.innerHTML = "";
+    grid.appendChild(extraCell.cellEm);
     for (let rowIndex = -1; rowIndex <= gridSize; rowIndex++) {
         for (let colIndex = -1; colIndex <= gridSize; colIndex++) {
             if (!isArrowCell(rowIndex, colIndex) && !isGridCell(rowIndex, colIndex)) continue;
-            let cellEm = gridData[rowIndex][colIndex].cellEm;
+            let cellEm = null;
             if (isGridCell(rowIndex, colIndex)) {
-                setupGridCell(rowIndex, colIndex, cellEm);
+                cellEm = gridData[rowIndex][colIndex].cellEm;
             } else {
-                setupArrowCells(cellEm);
+                cellEm = createArrowCell(rowIndex, colIndex);
             }
             grid.appendChild(cellEm);
         }
