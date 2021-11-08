@@ -11,27 +11,23 @@
         <h1>Webprogramozas Beadando - Gyarmati Andras - UY18CX</h1>
 
         <div>hány játékos (1-4) -- alapértelmezetten 2</div>
-        <div>
-            játékosonként hány kincskártya (1-(24/játékosok száma)) --
-            alapértelmezetten 2
-        </div>
-        <button id="grid-button" onclick="showGrid()">
-            Egy start gomb megnyomásával megjelenik a játéktér.
-        </button>
-        <button onclick="toggleManual()">
-            Egy másik gomb megnyomásával a játék leírása jelenik meg.
-        </button>
+        <div>játékosonként hány kincskártya (1-(24/játékosok száma)) -- alapértelmezetten 2</div>
+        <button id="grid-button" onclick="showGrid()">Egy start gomb megnyomásával megjelenik a játéktér.</button>
+        <button onclick="toggleManual()">Egy másik gomb megnyomásával a játék leírása jelenik meg.</button>
         <div id="manual">
-            A katakomba szobáit egy 7x7-es négyzetrács cellái jelképezik. Minden
-            szobában adott, hogy hány falán van ajtó. Ha két szomszédos szoba
-            érintkező falán egy-egy ajtó van, akkor át lehet menni egyik
-            szobából a másikba. A négyzetrács páros sorait és oszlopait el lehet
-            tolni, a többi szoba végig rögzített a játék során. Az eltolásokkal
-            az ajtókon keresztül utak nyílnak a szobák között, így lehet eljutni
-            a kincsekhez. Mindegyik kérő arra törekszik, hogy a katakomba
-            szobáinak ötletes eltolásával eljusson a kincsekhez. Aki elsőként
-            találja meg mindahányat és kiindulópontjára sikeresen visszaérkezik
-            az a nyertes.
+            A katakomba szobáit egy 7x7-es négyzetrács cellái jelképezik. Minden szobában adott, hogy hány falán van
+            ajtó. Ha két szomszédos szoba érintkező falán egy-egy ajtó van, akkor át lehet menni egyik szobából a
+            másikba. A négyzetrács páros sorait és oszlopait el lehet tolni, a többi szoba végig rögzített a játék
+            során. Az eltolásokkal az ajtókon keresztül utak nyílnak a szobák között, így lehet eljutni a kincsekhez.
+            Mindegyik kérő arra törekszik, hogy a katakomba szobáinak ötletes eltolásával eljusson a kincsekhez. Aki
+            elsőként találja meg mindahányat és kiindulópontjára sikeresen visszaérkezik az a nyertes.
+        </div>
+
+        <div id="game-state">
+            <div>current player num: <span id="current-player-num"></span></div>
+            <div>treasure to find: <span id="current-treasure"></span></div>
+            <div>stat: <span id="stat"></span></div>
+            <div>current player: <span id="current-player"></span></div>
         </div>
         <div id="grid"></div>
 

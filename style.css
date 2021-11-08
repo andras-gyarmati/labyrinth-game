@@ -22,8 +22,8 @@ body {
 }
 
 .animated-cell {
-    transition: all 1s ease;
-    -webkit-transition: all 1s ease;
+    transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;
 }
 
 #manual {
@@ -39,5 +39,5 @@ body {
 }
 
 .arrow-cell {
-    background-color: rgb(239, 255, 13);
+    background-color: rgb(158, 224, 71);
 }

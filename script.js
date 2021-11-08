@@ -3,6 +3,7 @@ const GameStates = Object.freeze({
     MOVE: "MOVE",
 });
 
+// todo move functions inside classes
 class Cell {
     constructor(code, rowIndex, colIndex) {
         this.sides = code.split("");
@@ -23,7 +24,7 @@ class Treasure {
 }
 
 const cellSize = 85;
-const treasures = [...Array(24).keys()].map((x) => new Treasure(x));
+const treasures = [...Array(24).keys()].sort(() => Math.random() - 0.5).map((x) => new Treasure(x));
 const grid = document.querySelector("#grid");
 const gridSize = 7;
 const initialGridData = [
@@ -35,11 +36,15 @@ const initialGridData = [
     ["0101", "0111", "0101", "1010", "0101", "0101", "1110"],
     ["1100", "1010", "1101", "0101", "1101", "1001", "1001"],
 ];
-let playerCount = 1; // todo: from user input
-let treasureCount = 1; // todo: from user input
+let playerCount = 2; // todo: from user input
+let treasureCount = 2; // todo: from user input
 let extraCell = new Cell("0110", -1, -1);
 let gridData = [];
 let players = [];
+let stateBoardPlayerNum = document.querySelector("#current-player-num");
+let stateBoardTreasure = document.querySelector("#current-treasure");
+let stateBoardStat = document.querySelector("#stat");
+let stateBoardPlayer = document.querySelector("#current-player");
 
 function genCells() {
     for (let rowIndex = 0; rowIndex < initialGridData.length; rowIndex++) {
@@ -55,7 +60,7 @@ function genCells() {
 genCells();
 
 function isFixed(x, y) {
-    return x % 2 == 1 && y % 2 == 1;
+    return x % 2 == 0 && y % 2 == 0;
 }
 
 function moveCell(rowIndex, colIndex) {
@@ -203,9 +208,13 @@ function showGrid() {
 
 function initPlayers() {
     for (let i = 0; i < playerCount; i++) {
-        players.push(new Player());
+        players.push(new Player(treasures.slice(i * treasureCount, (i + 1) * treasureCount)));
     }
+    console.log(JSON.stringify(players));
+    console.log(JSON.stringify(treasures));
 }
+
+initPlayers();
 
 function rotateCell(cell) {
     let shifted = cell.sides.shift();
