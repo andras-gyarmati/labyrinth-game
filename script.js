@@ -12,14 +12,19 @@ class Cell {
 }
 
 class Player {
-    constructor(treasures) {
+    constructor(treasures, number) {
+        this.number = number;
+        this.name = `Player ${number}`;
         this.treasures = treasures;
+        this.treasures.forEach((x) => (x.isDealed = true));
     }
 }
 
 class Treasure {
     constructor(number) {
         this.number = number;
+        this.isDealed = false;
+        this.isFound = false;
     }
 }
 
@@ -41,10 +46,11 @@ let treasureCount = 2; // todo: from user input
 let extraCell = new Cell("0110", -1, -1);
 let gridData = [];
 let players = [];
-let stateBoardPlayerNum = document.querySelector("#current-player-num");
-let stateBoardTreasure = document.querySelector("#current-treasure");
-let stateBoardStat = document.querySelector("#stat");
-let stateBoardPlayer = document.querySelector("#current-player");
+const stateBoardPlayerNum = document.querySelector("#current-player-num");
+const stateBoardTreasure = document.querySelector("#current-treasure");
+const stateBoardStat = document.querySelector("#stat");
+const stateBoardPlayer = document.querySelector("#current-player");
+let currentPlayer = null;
 
 function genCells() {
     for (let rowIndex = 0; rowIndex < initialGridData.length; rowIndex++) {
@@ -208,8 +214,11 @@ function showGrid() {
 
 function initPlayers() {
     for (let i = 0; i < playerCount; i++) {
-        players.push(new Player(treasures.slice(i * treasureCount, (i + 1) * treasureCount)));
+        players.push(new Player(treasures.slice(i * treasureCount, (i + 1) * treasureCount), i + 1));
     }
+
+    currentPlayer = players[0];
+
     console.log(JSON.stringify(players));
     console.log(JSON.stringify(treasures));
 }
@@ -223,3 +232,14 @@ function rotateCell(cell) {
 }
 
 drawGrid();
+
+function displayStat() {
+    stateBoardPlayerNum.innerHTML = players.indexOf(currentPlayer) + 1;
+    stateBoardTreasure.innerHTML = currentPlayer.treasures.find((x) => !x.isFound).number;
+    stateBoardStat.innerHTML = `${currentPlayer.treasures.filter((x) => x.isFound).length} / ${
+        currentPlayer.treasures.length
+    }`;
+    stateBoardPlayer.innerHTML = currentPlayer.name;
+}
+
+displayStat();
