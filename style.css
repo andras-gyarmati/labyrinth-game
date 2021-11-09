@@ -15,10 +15,14 @@ body {
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    width: 83px;
-    height: 83px;
+    width: 85px;
+    height: 86px;
     display: inline-block;
-    border-radius: 10px;
+    border-width: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .grid-cell {
@@ -45,4 +49,35 @@ body {
 
 .arrow-cell {
     background-color: rgb(99, 61, 80);
+}
+
+.player {
+    width: 30px;
+    height: 30px;
+    background-color: rgb(107, 134, 107);
+    color: black;
+    border-radius: 50%;
+    margin: 5px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    border-top: 5px solid rgb(107, 134, 107);
+    text-align: center;
+}
+
+.active-player {
+    background-color: rgb(88, 180, 88);
+    border-top: 5px solid rgb(88, 180, 88);
+}
+
+.corner-cell {
+    position: relative;
+}
+
+.corner-marker {
+    position: absolute;
+    top: 5px;
+    left: 20px;
+    font-size: 60px;
+    color: rgba(255, 255, 255, 0.2);
 }

@@ -1,6 +1,7 @@
 const GameStates = Object.freeze({
     INSERT: "INSERT",
     MOVE: "MOVE",
+    END: "END",
 });
 
 // todo move functions inside classes
@@ -8,6 +9,7 @@ class Cell {
     constructor(code, rowIndex, colIndex) {
         this.sides = code.split("");
         this.cellEm = createGridCell(rowIndex, colIndex, this.sides);
+        this.players = [];
     }
 }
 
@@ -17,7 +19,15 @@ class Player {
         this.name = `Player ${number}`;
         this.treasures = treasures;
         this.treasures.forEach((x) => (x.isDealed = true));
+        this.playerEm = createPlayerEm(number);
     }
+}
+
+function createPlayerEm(number) {
+    let playerEm = document.createElement("div");
+    playerEm.classList.add("player");
+    playerEm.innerHTML = `P${number}`;
+    return playerEm;
 }
 
 class Treasure {
@@ -41,16 +51,18 @@ const initialGridData = [
     ["0101", "0111", "0101", "1010", "0101", "0101", "1110"],
     ["1100", "1010", "1101", "0101", "1101", "1001", "1001"],
 ];
-let playerCount = 2; // todo: from user input
-let treasureCount = 2; // todo: from user input
+let playerCount = 4; // todo: from user input
+let treasureCount = 4; // todo: from user input
 let extraCell = new Cell("0110", -1, -1);
 let gridData = [];
 let players = [];
+let corners = [];
 const stateBoardPlayerNum = document.querySelector("#current-player-num");
 const stateBoardTreasure = document.querySelector("#current-treasure");
 const stateBoardStat = document.querySelector("#stat");
 const stateBoardPlayer = document.querySelector("#current-player");
 let currentPlayer = null;
+let gameState = GameStates.INSERT;
 
 function genCells() {
     for (let rowIndex = 0; rowIndex < initialGridData.length; rowIndex++) {
@@ -125,6 +137,15 @@ function onArrowCellMouseLeave() {
     setCellEmPos(extraCell.cellEm, -1, -1);
 }
 
+function placePlayerOnCell(player, cell) {
+    console.log(player);
+    cell.players.push(player);
+    if (player.playerEm.parentNode) {
+        player.playerEm.parentNode.removeChild(player.playerEm);
+    }
+    cell.cellEm.appendChild(player.playerEm);
+}
+
 function setCellEmPos(cellEm, rowIndex, colIndex) {
     cellEm.dataset.rowIndex = rowIndex;
     cellEm.dataset.colIndex = colIndex;
@@ -153,7 +174,6 @@ function createGridCell(rowIndex, colIndex, sides) {
     cellEm.classList.add("grid-cell");
     cellEm.classList.add("animated-cell");
     setCellEmBorders(cellEm, sides);
-    cellEm.style.borderWidth = "15px";
     return cellEm;
 }
 
@@ -212,18 +232,48 @@ function showGrid() {
     document.querySelector("#grid-button").disabled = "disabled";
 }
 
+function initCorner(num, rowIndex, colIndex) {
+    let mark = document.createElement("div");
+    mark.innerHTML = num;
+    mark.classList.add("corner-marker");
+    gridData[rowIndex][colIndex].cellEm.classList.add("corner-cell");
+    gridData[rowIndex][colIndex].cellEm.appendChild(mark);
+    return gridData[rowIndex][colIndex];
+}
+
+initCorners();
+
 function initPlayers() {
+    console.log("initplayers");
     for (let i = 0; i < playerCount; i++) {
-        players.push(new Player(treasures.slice(i * treasureCount, (i + 1) * treasureCount), i + 1));
+        let player = new Player(treasures.slice(i * treasureCount, (i + 1) * treasureCount), i + 1);
+        placePlayerOnCell(player, corners[i]);
+        players.push(player);
     }
 
-    currentPlayer = players[0];
+    setCurrentPlayer(0);
 
     console.log(JSON.stringify(players));
     console.log(JSON.stringify(treasures));
 }
 
 initPlayers();
+
+function setCurrentPlayer(index) {
+    players.forEach((x) => x.playerEm.classList.remove("active-player"));
+    currentPlayer = players[index];
+    currentPlayer.playerEm.classList.add("active-player");
+}
+
+function initCorners() {
+    corners = [
+        initCorner(1, 0, 0),
+        initCorner(2, 0, gridSize - 1),
+        initCorner(3, gridSize - 1, 0),
+        initCorner(4, gridSize - 1, gridSize - 1),
+    ];
+    console.log(corners);
+}
 
 function rotateCell(cell) {
     let shifted = cell.sides.shift();
@@ -243,3 +293,37 @@ function displayStat() {
 }
 
 displayStat();
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function executeInsert() {
+    console.log("insert");
+    sleep(2000);
+    gameState = GameStates.MOVE;
+}
+function executeMove() {
+    console.log("move");
+    sleep(2000);
+    gameState = GameStates.INSERT;
+}
+function executeEnd() {}
+
+function gameLoop() {
+    while (gameState != GameStates.END) {
+        switch (gameState) {
+            case GameStates.INSERT:
+                executeInsert();
+                break;
+            case GameStates.MOVE:
+                executeMove();
+                break;
+            case GameStates.END:
+                executeEnd();
+                break;
+        }
+    }
+}
+
+// gameLoop();
