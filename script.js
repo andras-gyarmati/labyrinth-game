@@ -310,20 +310,31 @@ function executeMove() {
 }
 function executeEnd() {}
 
+// todo:
+// make it event based not tick based
+// first you can cick on arrowcells, when you clicked one it iserts the cell
+// and sets up the paths, now you can only click on those cells in the path
+// after you clicked one the program switches ower to the next player and the
+// process begins again
+
+// alternatively we can enable arrow cells when waiting for a path cell click
+// this will assume you didnt wanted to move on the board
+
 function gameLoop() {
-    while (gameState != GameStates.END) {
-        switch (gameState) {
-            case GameStates.INSERT:
-                executeInsert();
-                break;
-            case GameStates.MOVE:
-                executeMove();
-                break;
-            case GameStates.END:
-                executeEnd();
-                break;
-        }
+    // while (gameState != GameStates.END) {
+    switch (gameState) {
+        case GameStates.INSERT:
+            executeInsert();
+            break;
+        case GameStates.MOVE:
+            executeMove();
+            break;
+        case GameStates.END:
+            executeEnd();
+            break;
     }
+    // }
+    window.requestAnimationFrame(gameLoop);
 }
 
 // gameLoop();
