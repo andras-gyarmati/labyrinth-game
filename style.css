@@ -1,5 +1,10 @@
+html {
+    background-color: rgb(41, 41, 41);
+}
+
 body {
     font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+    color: rgb(192, 182, 175);
 }
 
 #grid {
@@ -17,8 +22,8 @@ body {
 }
 
 .grid-cell {
-    border-color: rgb(78, 0, 0);
-    background-color: rgb(193, 225, 247);
+    border-color: rgb(209, 180, 180);
+    background-color: rgb(50, 70, 83);
 }
 
 .animated-cell {
@@ -35,9 +40,9 @@ body {
 }
 
 .path-cell {
-    background-color: rgb(168, 252, 196);
+    background-color: rgb(101, 156, 119);
 }
 
 .arrow-cell {
-    background-color: rgb(158, 224, 71);
+    background-color: rgb(99, 61, 80);
 }
