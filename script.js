@@ -1,13 +1,35 @@
+const getCircularReplacer = () => {
+    const seen = new WeakSet();
+    return (key, value) => {
+        if (typeof value === "object" && value !== null) {
+            if (seen.has(value)) {
+                return;
+            }
+            seen.add(value);
+        }
+        return value;
+    };
+};
+
 const GameStates = Object.freeze({
     INSERT: "INSERT",
     MOVE: "MOVE",
     END: "END",
 });
 
+const Directions = Object.freeze({
+    UP: 0,
+    RIGHT: 1,
+    DOWN: 2,
+    LEFT: 3,
+});
+
 // todo move functions inside classes
 class Cell {
     constructor(code, rowIndex, colIndex) {
         this.sides = code.split("");
+        this.rowIndex = parseInt(rowIndex);
+        this.colIndex = parseInt(colIndex);
         this.cellEm = createGridCell(rowIndex, colIndex, this.sides);
         this.players = [];
     }
@@ -20,6 +42,7 @@ class Player {
         this.treasures = treasures;
         this.treasures.forEach((x) => (x.isDealed = true));
         this.playerEm = createPlayerEm(number);
+        this.cell = null;
     }
 }
 
@@ -82,13 +105,16 @@ function isFixed(x, y) {
 }
 
 function moveCell(rowIndex, colIndex) {
-    setCellEmPos(gridData[rowIndex][colIndex].cellEm, rowIndex, colIndex);
+    let cell = gridData[rowIndex][colIndex];
+    cell.rowIndex = parseInt(rowIndex);
+    cell.colIndex = parseInt(colIndex);
+    setCellEmPos(cell.cellEm, rowIndex, colIndex);
 }
 
 function arrowCellClicked(event) {
     let cell = event.target;
-    let colIndex = cell.dataset.colIndex;
-    let rowIndex = cell.dataset.rowIndex;
+    let colIndex = parseInt(cell.dataset.colIndex);
+    let rowIndex = parseInt(cell.dataset.rowIndex);
     let tmpCell;
     if (rowIndex == -1) {
         tmpCell = gridData[gridSize - 1][colIndex];
@@ -135,11 +161,14 @@ function onArrowCellMouseEnter(el) {
 
 function onArrowCellMouseLeave() {
     setCellEmPos(extraCell.cellEm, -1, -1);
+    extraCell.rowIndex = -1;
+    extraCell.colIndex = -1;
 }
 
 function placePlayerOnCell(player, cell) {
-    console.log(player);
+    // console.log(JSON.stringify(player, getCircularReplacer()));
     cell.players.push(player);
+    player.cell = cell;
     if (player.playerEm.parentNode) {
         player.playerEm.parentNode.removeChild(player.playerEm);
     }
@@ -147,8 +176,8 @@ function placePlayerOnCell(player, cell) {
 }
 
 function setCellEmPos(cellEm, rowIndex, colIndex) {
-    cellEm.dataset.rowIndex = rowIndex;
-    cellEm.dataset.colIndex = colIndex;
+    cellEm.dataset.rowIndex = parseInt(rowIndex);
+    cellEm.dataset.colIndex = parseInt(colIndex);
     cellEm.style.top = `${(parseInt(rowIndex) + 1) * cellSize}px`;
     cellEm.style.left = `${(parseInt(colIndex) + 1) * cellSize}px`;
 }
@@ -185,11 +214,69 @@ function isArrowCell(rowIndex, colIndex) {
     );
 }
 
+function showPath() {
+    let cell = currentPlayer.cell;
+    let rowIndex = parseInt(cell.rowIndex);
+    let colIndex = parseInt(cell.colIndex);
+    let pathCells = bfs(rowIndex, colIndex);
+    console.log(pathCells);
+    pathCells.forEach((x) => {
+        console.log(x);
+        x.cellEm.classList.add("path-cell");
+        x.cellEm.addEventListener("click", () => {
+            console.log("path cell clicked");
+        });
+    });
+}
+
+function bfs(rowIndex, colIndex) {
+    let cells = [];
+    let queue = [gridData[rowIndex][colIndex]];
+    while (queue.length) {
+        let current = queue[0];
+        let cri = current.rowIndex;
+        let cci = current.colIndex;
+        // top neighbor
+        if (cri - 1 >= 0) {
+            let tn = gridData[cri - 1][cci];
+            if (current.sides[Directions.UP] == 1 && tn.sides[Directions.DOWN] == 1 && !cells.includes(tn)) {
+                queue.push(tn);
+            }
+        }
+        // right neighbor
+        if (cci + 1 < gridSize) {
+            let rn = gridData[cri][cci + 1];
+            if (current.sides[Directions.RIGHT] == 1 && rn.sides[Directions.LEFT] == 1 && !cells.includes(rn)) {
+                queue.push(rn);
+            }
+        }
+        // bottom neighbor
+        if (cri + 1 < gridSize) {
+            let bn = gridData[cri + 1][cci];
+            if (current.sides[Directions.DOWN] == 1 && bn.sides[Directions.UP] == 1 && !cells.includes(bn)) {
+                queue.push(bn);
+            }
+        }
+        // left neighbor
+        if (cci - 1 >= 0) {
+            let ln = gridData[cri][cci - 1];
+            if (current.sides[Directions.LEFT] == 1 && ln.sides[Directions.RIGHT] == 1 && !cells.includes(ln)) {
+                queue.push(ln);
+            }
+        }
+
+        cells.push(queue.shift());
+        // console.log(JSON.stringify(cells, getCircularReplacer()));
+    }
+    return cells;
+}
+
 function createArrowCell(rowIndex, colIndex) {
     let cellEm = createCellEm(rowIndex, colIndex);
     cellEm.addEventListener("click", (e) => {
         arrowCellClicked(e);
         onArrowCellMouseLeave();
+        showPath();
     });
     cellEm.classList.add("arrow-cell");
     // cellEm.addEventListener("mouseenter", () => onArrowCellMouseEnter(cellEm));
@@ -244,7 +331,7 @@ function initCorner(num, rowIndex, colIndex) {
 initCorners();
 
 function initPlayers() {
-    console.log("initplayers");
+    // console.log("initplayers");
     for (let i = 0; i < playerCount; i++) {
         let player = new Player(treasures.slice(i * treasureCount, (i + 1) * treasureCount), i + 1);
         placePlayerOnCell(player, corners[i]);
@@ -253,8 +340,8 @@ function initPlayers() {
 
     setCurrentPlayer(0);
 
-    console.log(JSON.stringify(players));
-    console.log(JSON.stringify(treasures));
+    // console.log(JSON.stringify(players, getCircularReplacer()));
+    // console.log(JSON.stringify(treasures));
 }
 
 initPlayers();
@@ -272,7 +359,7 @@ function initCorners() {
         initCorner(3, gridSize - 1, 0),
         initCorner(4, gridSize - 1, gridSize - 1),
     ];
-    console.log(corners);
+    // console.log(corners);
 }
 
 function rotateCell(cell) {
@@ -303,11 +390,13 @@ function executeInsert() {
     sleep(2000);
     gameState = GameStates.MOVE;
 }
+
 function executeMove() {
     console.log("move");
     sleep(2000);
     gameState = GameStates.INSERT;
 }
+
 function executeEnd() {}
 
 // todo:
@@ -319,22 +408,3 @@ function executeEnd() {}
 
 // alternatively we can enable arrow cells when waiting for a path cell click
 // this will assume you didnt wanted to move on the board
-
-function gameLoop() {
-    // while (gameState != GameStates.END) {
-    switch (gameState) {
-        case GameStates.INSERT:
-            executeInsert();
-            break;
-        case GameStates.MOVE:
-            executeMove();
-            break;
-        case GameStates.END:
-            executeEnd();
-            break;
-    }
-    // }
-    window.requestAnimationFrame(gameLoop);
-}
-
-// gameLoop();
