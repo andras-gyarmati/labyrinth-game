@@ -80,6 +80,7 @@ let extraCell = new Cell("0110", -1, -1);
 let gridData = [];
 let players = [];
 let corners = [];
+let pathCells = [];
 const stateBoardPlayerNum = document.querySelector("#current-player-num");
 const stateBoardTreasure = document.querySelector("#current-treasure");
 const stateBoardStat = document.querySelector("#stat");
@@ -167,6 +168,17 @@ function onArrowCellMouseLeave() {
 
 function placePlayerOnCell(player, cell) {
     // console.log(JSON.stringify(player, getCircularReplacer()));
+
+    //  remove player from current cell
+    if (player.cell) {
+        let rowIndex = parseInt(player.cell.cellEm.dataset.rowIndex);
+        let colIndex = parseInt(player.cell.cellEm.dataset.colIndex);
+        let players = gridData[rowIndex][colIndex].players;
+        const index = players.indexOf(player);
+        if (index > -1) players.splice(index, 1);
+    }
+
+    // add player to clicked pathcell
     cell.players.push(player);
     player.cell = cell;
     if (player.playerEm.parentNode) {
@@ -218,14 +230,28 @@ function showPath() {
     let cell = currentPlayer.cell;
     let rowIndex = parseInt(cell.rowIndex);
     let colIndex = parseInt(cell.colIndex);
-    let pathCells = bfs(rowIndex, colIndex);
+    pathCells = bfs(rowIndex, colIndex);
     console.log(pathCells);
     pathCells.forEach((x) => {
-        console.log(x);
         x.cellEm.classList.add("path-cell");
-        x.cellEm.addEventListener("click", () => {
-            console.log("path cell clicked");
-        });
+        x.cellEm.addEventListener("click", pathCellClicked);
+    });
+}
+
+function pathCellClicked(event) {
+    let cellEm = event.target.closest(".cell");
+    let rowIndex = parseInt(cellEm.dataset.rowIndex);
+    let colIndex = parseInt(cellEm.dataset.colIndex);
+    placePlayerOnCell(currentPlayer, gridData[rowIndex][colIndex]);
+    console.log("path cell clicked");
+    discardPathCells();
+}
+
+function discardPathCells() {
+    if (!pathCells) return;
+    pathCells.forEach((x) => {
+        x.cellEm.classList.remove("path-cell");
+        x.cellEm.removeEventListener("click", pathCellClicked);
     });
 }
 
@@ -274,6 +300,7 @@ function bfs(rowIndex, colIndex) {
 function createArrowCell(rowIndex, colIndex) {
     let cellEm = createCellEm(rowIndex, colIndex);
     cellEm.addEventListener("click", (e) => {
+        discardPathCells();
         arrowCellClicked(e);
         onArrowCellMouseLeave();
         showPath();
