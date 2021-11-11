@@ -156,29 +156,36 @@ function arrowCellClicked(event) {
     }
 }
 
-function onArrowCellMouseEnter(el) {
-    setCellEmPos(extraCell.cellEm, el.dataset.rowIndex, el.dataset.colIndex);
-}
+// function onArrowCellMouseEnter(el) {
+//     setCellEmPos(extraCell.cellEm, el.dataset.rowIndex, el.dataset.colIndex);
+// }
 
-function onArrowCellMouseLeave() {
+function moveExtraCellToCorner() {
+    if (extraCell.players) {
+        // get other side cellpos
+        // move players there
+        let rowIndex = extraCell.rowIndex;
+        let colIndex = extraCell.colIndex;
+        if (rowIndex === 0) rowIndex = gridSize - 1;
+        else if (rowIndex === gridSize - 1) rowIndex = 0;
+        else if (colIndex === 0) colIndex = gridSize - 1;
+        else if (colIndex === gridSize - 1) colIndex = 0;
+        let cell = gridData[rowIndex][colIndex];
+        extraCell.players.forEach((player) => placePlayerOnCell(player, cell));
+    }
+
     setCellEmPos(extraCell.cellEm, -1, -1);
     extraCell.rowIndex = -1;
     extraCell.colIndex = -1;
 }
 
 function placePlayerOnCell(player, cell) {
-    // console.log(JSON.stringify(player, getCircularReplacer()));
-
-    //  remove player from current cell
+    if (cell === player.cell) return;
     if (player.cell) {
-        let rowIndex = parseInt(player.cell.cellEm.dataset.rowIndex);
-        let colIndex = parseInt(player.cell.cellEm.dataset.colIndex);
-        let players = gridData[rowIndex][colIndex].players;
-        const index = players.indexOf(player);
-        if (index > -1) players.splice(index, 1);
+        const index = player.cell.players.indexOf(player);
+        if (index > -1) player.cell.players.splice(index, 1);
     }
 
-    // add player to clicked pathcell
     cell.players.push(player);
     player.cell = cell;
     if (player.playerEm.parentNode) {
@@ -231,10 +238,11 @@ function showPath() {
     let rowIndex = parseInt(cell.rowIndex);
     let colIndex = parseInt(cell.colIndex);
     pathCells = bfs(rowIndex, colIndex);
-    console.log(pathCells);
+    // console.log(pathCells);
     pathCells.forEach((x) => {
         x.cellEm.classList.add("path-cell");
         x.cellEm.addEventListener("click", pathCellClicked);
+        // maybe we should add the eventlistener to all cells and just check if it is a pathcell?
     });
 }
 
@@ -243,7 +251,7 @@ function pathCellClicked(event) {
     let rowIndex = parseInt(cellEm.dataset.rowIndex);
     let colIndex = parseInt(cellEm.dataset.colIndex);
     placePlayerOnCell(currentPlayer, gridData[rowIndex][colIndex]);
-    console.log("path cell clicked");
+    // console.log("path cell clicked");
     discardPathCells();
 }
 
@@ -302,7 +310,7 @@ function createArrowCell(rowIndex, colIndex) {
     cellEm.addEventListener("click", (e) => {
         discardPathCells();
         arrowCellClicked(e);
-        onArrowCellMouseLeave();
+        moveExtraCellToCorner();
         showPath();
     });
     cellEm.classList.add("arrow-cell");
