@@ -113,6 +113,9 @@ function moveCell(rowIndex, colIndex) {
 }
 
 function arrowCellClicked(event) {
+    if (pathCells.length) activateNextPlayer();
+    discardPathCells();
+
     let cell = event.target;
     let colIndex = parseInt(cell.dataset.colIndex);
     let rowIndex = parseInt(cell.dataset.rowIndex);
@@ -171,6 +174,7 @@ function moveExtraCellToCorner() {
         else if (colIndex === 0) colIndex = gridSize - 1;
         else if (colIndex === gridSize - 1) colIndex = 0;
         let cell = gridData[rowIndex][colIndex];
+        // has a bug: if multiple players are on the cell only some of them gets moved
         extraCell.players.forEach((player) => placePlayerOnCell(player, cell));
     }
 
@@ -253,6 +257,12 @@ function pathCellClicked(event) {
     placePlayerOnCell(currentPlayer, gridData[rowIndex][colIndex]);
     // console.log("path cell clicked");
     discardPathCells();
+    activateNextPlayer();
+}
+
+function activateNextPlayer() {
+    players.push(players.shift());
+    setCurrentPlayer(0);
 }
 
 function discardPathCells() {
@@ -261,6 +271,7 @@ function discardPathCells() {
         x.cellEm.classList.remove("path-cell");
         x.cellEm.removeEventListener("click", pathCellClicked);
     });
+    pathCells = [];
 }
 
 function bfs(rowIndex, colIndex) {
@@ -308,7 +319,6 @@ function bfs(rowIndex, colIndex) {
 function createArrowCell(rowIndex, colIndex) {
     let cellEm = createCellEm(rowIndex, colIndex);
     cellEm.addEventListener("click", (e) => {
-        discardPathCells();
         arrowCellClicked(e);
         moveExtraCellToCorner();
         showPath();
@@ -398,8 +408,7 @@ function initCorners() {
 }
 
 function rotateCell(cell) {
-    let shifted = cell.sides.shift();
-    cell.sides.push(shifted);
+    cell.sides.push(cell.sides.shift());
     setCellEmBorders(cell.cellEm, cell.sides);
 }
 
