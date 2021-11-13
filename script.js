@@ -81,7 +81,6 @@ let gridData = [];
 let players = [];
 let corners = [];
 let pathCells = [];
-const stateBoardPlayerNum = document.querySelector("#current-player-num");
 const stateBoardTreasure = document.querySelector("#current-treasure");
 const stateBoardStat = document.querySelector("#stat");
 const stateBoardPlayer = document.querySelector("#current-player");
@@ -263,6 +262,7 @@ function pathCellClicked(event) {
 function activateNextPlayer() {
     players.push(players.shift());
     setCurrentPlayer(0);
+    updateStatDisplay();
 }
 
 function discardPathCells() {
@@ -414,16 +414,15 @@ function rotateCell(cell) {
 
 drawGrid();
 
-function displayStat() {
-    stateBoardPlayerNum.innerHTML = players.indexOf(currentPlayer) + 1;
+function updateStatDisplay() {
+    stateBoardPlayer.innerHTML = currentPlayer.name;
     stateBoardTreasure.innerHTML = currentPlayer.treasures.find((x) => !x.isFound).number;
     stateBoardStat.innerHTML = `${currentPlayer.treasures.filter((x) => x.isFound).length} / ${
         currentPlayer.treasures.length
     }`;
-    stateBoardPlayer.innerHTML = currentPlayer.name;
 }
 
-displayStat();
+updateStatDisplay();
 
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
