@@ -4,7 +4,7 @@ html {
 
 body {
     font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
-    color: rgb(192, 182, 175);
+    color: rgb(192, 175, 175);
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -21,14 +21,15 @@ body {
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    width: 85px;
-    height: 85px;
+    width: 84px;
+    height: 84px;
     display: inline-block;
     border-width: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
+    border-radius: 5px;
 }
 
 .grid-cell {
@@ -76,6 +77,30 @@ body {
     border-top: 3px solid rgb(88, 180, 88);
 }
 
+.treasure {
+    width: 24px;
+    height: 24px;
+    background-color: rgb(132, 134, 107);
+    color: black;
+    border-radius: 50%;
+    margin: 3px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    border-top: 3px solid rgb(132, 134, 107);
+    text-align: center;
+}
+
+.active-treasure {
+    background-color: rgb(180, 178, 88);
+    border-top: 3px solid rgb(180, 178, 88);
+}
+
+.found-treasure {
+    background-color: rgb(180, 88, 88);
+    border-top: 3px solid rgb(180, 88, 88);
+}
+
 .corner-cell {
     position: relative;
 }
@@ -86,4 +111,10 @@ body {
     left: 20px;
     font-size: 60px;
     color: rgba(255, 255, 255, 0.2);
+}
+
+#winner {
+    display: none;
+    color: yellow;
+    font-size: large;
 }
