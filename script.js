@@ -36,7 +36,7 @@ class Player {
         this.name = `Player ${number}`;
         this.treasures = treasures;
         this.treasures.forEach((x) => (x.isDealed = true));
-        this.playerEm = createPlayerEm(number);
+        this.playerEm = this.createPlayerEm(number);
         this.cell = null;
         this.cornerCell = null;
     }
@@ -44,13 +44,13 @@ class Player {
     currentTreasure() {
         return this.treasures.find((x) => !x.isFound);
     }
-}
 
-function createPlayerEm(number) {
-    let playerEm = document.createElement("div");
-    playerEm.classList.add("player");
-    playerEm.innerHTML = `P${number}`;
-    return playerEm;
+    createPlayerEm(number) {
+        let playerEm = document.createElement("div");
+        playerEm.classList.add("player");
+        playerEm.innerHTML = `P${number}`;
+        return playerEm;
+    }
 }
 
 class Treasure {
@@ -58,16 +58,16 @@ class Treasure {
         this.number = number;
         this.isDealed = false;
         this.isFound = false;
-        this.treasureEm = createTreasureEm(number);
+        this.treasureEm = this.createTreasureEm(number);
         this.cell = null;
     }
-}
 
-function createTreasureEm(number) {
-    let treasureEm = document.createElement("div");
-    treasureEm.classList.add("treasure");
-    treasureEm.innerHTML = `T${number}`;
-    return treasureEm;
+    createTreasureEm(number) {
+        let treasureEm = document.createElement("div");
+        treasureEm.classList.add("treasure");
+        treasureEm.innerHTML = `T${number}`;
+        return treasureEm;
+    }
 }
 
 document.querySelector("html").addEventListener("contextmenu", (e) => {
@@ -75,21 +75,59 @@ document.querySelector("html").addEventListener("contextmenu", (e) => {
 });
 
 const cellSize = 85;
-const treasures = [...Array(24).keys()].sort(() => Math.random() - 0.5).map((x) => new Treasure(x));
+const treasures = shuffle([...Array(24).keys()]).map((x) => new Treasure(x));
 const gridEm = document.querySelector("#grid");
 const gridSize = 7;
-const initialGridData = [
-    ["0110", "1101", "0111", "1010", "0111", "0011", "0011"],
-    ["1101", "1010", "0011", "0011", "1010", "1110", "0110"],
-    ["1110", "0110", "1110", "1001", "0111", "1100", "1011"],
-    ["1001", "0011", "0101", "1001", "0110", "0101", "0011"],
-    ["1110", "1100", "1101", "1101", "1011", "0101", "1011"],
-    ["0101", "0111", "0101", "1010", "0101", "0101", "1110"],
-    ["1100", "1010", "1101", "0101", "1101", "1001", "1001"],
+let initialGridData = [
+    ["0110", "0000", "0111", "0000", "0111", "0000", "0011"],
+    ["0000", "0000", "0000", "0000", "0000", "0000", "0000"],
+    ["1110", "0000", "1110", "0000", "0111", "0000", "1011"],
+    ["0000", "0000", "0000", "0000", "0000", "0000", "0000"],
+    ["1110", "0000", "1101", "0000", "1011", "0000", "1011"],
+    ["0000", "0000", "0000", "0000", "0000", "0000", "0000"],
+    ["1100", "0000", "1101", "0000", "1101", "0000", "1001"],
 ];
-let playerCount = 1; // todo: from user input
-let treasureCount = 1; // todo: from user input
-let extraCell = new Cell("0110", -1, -1);
+let cellsToPlace = shuffle([
+    "1101",
+    "1010",
+    "0011",
+    "1101",
+    "1010",
+    "0011",
+    "0011",
+    "1010",
+    "1110",
+    "0110",
+    "0110",
+    "1001",
+    "1100",
+    "1001",
+    "0011",
+    "0101",
+    "1001",
+    "0110",
+    "0101",
+    "0011",
+    "1100",
+    "1101",
+    "0101",
+    "0101",
+    "0111",
+    "0101",
+    "1010",
+    "0101",
+    "0101",
+    "1110",
+    "1010",
+    "0101",
+    "1001",
+    "0110",
+]);
+
+let extraCell = new Cell(cellsToPlace.shift(), -1, -1);
+
+let playerCount = 2; // todo: from user input
+let treasureCount = 2; // todo: from user input
 let gridData = [];
 let players = [];
 let corners = [];
@@ -108,6 +146,7 @@ function genCells() {
         gridData[rowIndex] = [];
         for (let colIndex = 0; colIndex < row.length; colIndex++) {
             let cellCode = row[colIndex];
+            if (cellCode === "0000") cellCode = cellsToPlace.shift();
             let cell = new Cell(cellCode, rowIndex, colIndex);
             gridData[rowIndex][colIndex] = cell;
             cells.push(cell);
@@ -480,8 +519,13 @@ updateStatDisplay();
 
 function executeEnd() {}
 
+function shuffle(arr) {
+    arr.sort(() => Math.random() - 0.5);
+    return arr;
+}
+
 function placeTreasures() {
-    let shuffledCells = cells.sort(() => Math.random() - 0.5);
+    let shuffledCells = shuffle(cells);
     let dealedTreasures = treasures.filter((x) => x.isDealed);
     dealedTreasures.forEach((treasure) => {
         let treasurelessCell = shuffledCells.find((cell) => !cell.treasure && !corners.includes(cell));
