@@ -1,16 +1,3 @@
-const getCircularReplacer = () => {
-    const seen = new WeakSet();
-    return (key, value) => {
-        if (typeof value === "object" && value !== null) {
-            if (seen.has(value)) {
-                return;
-            }
-            seen.add(value);
-        }
-        return value;
-    };
-};
-
 const Directions = Object.freeze({
     UP: 0,
     RIGHT: 1,
@@ -18,7 +5,6 @@ const Directions = Object.freeze({
     LEFT: 3,
 });
 
-// todo move functions inside classes
 class Cell {
     constructor(code, rowIndex, colIndex) {
         this.sides = code.split("");
@@ -126,8 +112,26 @@ let cellsToPlace = shuffle([
 
 let extraCell = new Cell(cellsToPlace.shift(), -1, -1);
 
-let playerCount = 2; // todo: from user input
-let treasureCount = 2; // todo: from user input
+let playerCountRange = document.querySelector("#player-count-range");
+let treasureCountRange = document.querySelector("#treasure-count-range");
+const playerCountSpan = document.querySelector("#player-count");
+const treasureCountSpan = document.querySelector("#treasure-count");
+
+let playerCount = 2;
+let treasureCount = 2;
+
+treasureCountRange.max = treasures.length / playerCount;
+updateTreasureRange();
+
+playerCountRange.addEventListener("input", (e) => {
+    playerCount = parseInt(e.target.value);
+    playerCountSpan.innerHTML = playerCount;
+    treasureCountRange.max = treasures.length / playerCount;
+    updateTreasureRange();
+});
+
+treasureCountRange.addEventListener("input", updateTreasureRange);
+
 let gridData = [];
 let players = [];
 let corners = [];
@@ -139,6 +143,20 @@ const stateBoardPlayer = document.querySelector("#current-player");
 const winnerEm = document.querySelector("#winner");
 const winnerName = document.querySelector("#winner-name");
 let currentPlayer = null;
+
+
+// todo: make it replayable
+genCells();
+initCorners();
+initPlayers();
+drawGrid();
+updateStatDisplay();
+placeTreasures();
+
+function updateTreasureRange() {
+    treasureCount = treasureCountRange.value;
+    treasureCountSpan.innerHTML = treasureCount;
+}
 
 function genCells() {
     for (let rowIndex = 0; rowIndex < initialGridData.length; rowIndex++) {
@@ -153,8 +171,6 @@ function genCells() {
         }
     }
 }
-
-genCells();
 
 function isFixed(x, y) {
     return x % 2 == 0 && y % 2 == 0;
@@ -214,14 +230,8 @@ function arrowCellClicked(event) {
     }
 }
 
-// function onArrowCellMouseEnter(el) {
-//     setCellEmPos(extraCell.cellEm, el.dataset.rowIndex, el.dataset.colIndex);
-// }
-
 function moveExtraCellToCorner() {
     if (extraCell.players) {
-        // get other side cellpos
-        // move players there
         let rowIndex = extraCell.rowIndex;
         let colIndex = extraCell.colIndex;
         if (rowIndex === 0) rowIndex = gridSize - 1;
@@ -256,7 +266,6 @@ function placePlayerOnCell(player, cell) {
     checkIfPlayerWon(player);
 }
 
-// todo: check if treasure found, check if all treasure found, check if all treasure found and we are on start cell, then we win
 function checkIfPlayerWon(player) {
     if (player.treasures.every((x) => x.isFound) && player.cell == player.cornerCell) {
         gridEm.style.display = "none";
@@ -324,7 +333,6 @@ function showPath() {
     let rowIndex = parseInt(cell.rowIndex);
     let colIndex = parseInt(cell.colIndex);
     pathCells = bfs(rowIndex, colIndex);
-    // console.log(pathCells);
     pathCells.forEach((x) => {
         x.cellEm.classList.add("path-cell");
         x.cellEm.addEventListener("click", pathCellClicked);
@@ -337,7 +345,6 @@ function pathCellClicked(event) {
     let rowIndex = parseInt(cellEm.dataset.rowIndex);
     let colIndex = parseInt(cellEm.dataset.colIndex);
     placePlayerOnCell(currentPlayer, gridData[rowIndex][colIndex]);
-    // console.log("path cell clicked");
     discardPathCells();
     activateNextPlayer();
 }
@@ -394,7 +401,6 @@ function bfs(rowIndex, colIndex) {
         }
 
         cells.push(queue.shift());
-        // console.log(JSON.stringify(cells, getCircularReplacer()));
     }
     return cells;
 }
@@ -407,8 +413,6 @@ function createArrowCell(rowIndex, colIndex) {
         showPath();
     });
     cellEm.classList.add("arrow-cell");
-    // cellEm.addEventListener("mouseenter", () => onArrowCellMouseEnter(cellEm));
-    // cellEm.addEventListener("mouseleave", () => onArrowCellMouseLeave());
     cellEm.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         rotateCell(extraCell);
@@ -457,24 +461,15 @@ function initCorner(num, rowIndex, colIndex) {
     return cell;
 }
 
-initCorners();
-
 function initPlayers() {
-    // console.log("initplayers");
     for (let i = 0; i < playerCount; i++) {
         let player = new Player(treasures.slice(i * treasureCount, (i + 1) * treasureCount), i + 1);
         placePlayerOnCell(player, corners[i]);
         player.cornerCell = corners[i];
         players.push(player);
     }
-
     setActivePlayer(0);
-
-    // console.log(JSON.stringify(players, getCircularReplacer()));
-    // console.log(JSON.stringify(treasures));
 }
-
-initPlayers();
 
 function setActivePlayer(index) {
     players.forEach((x) => x.playerEm.classList.remove("active-player"));
@@ -496,15 +491,12 @@ function initCorners() {
         initCorner(3, gridSize - 1, 0),
         initCorner(4, gridSize - 1, gridSize - 1),
     ];
-    // console.log(corners);
 }
 
 function rotateCell(cell) {
     cell.sides.push(cell.sides.shift());
     setCellEmBorders(cell.cellEm, cell.sides);
 }
-
-drawGrid();
 
 function updateStatDisplay() {
     stateBoardPlayer.innerHTML = currentPlayer.name;
@@ -514,8 +506,6 @@ function updateStatDisplay() {
         currentPlayer.treasures.length
     }`;
 }
-
-updateStatDisplay();
 
 function executeEnd() {}
 
@@ -532,5 +522,3 @@ function placeTreasures() {
         if (treasurelessCell) placeTreasureOnCell(treasure, treasurelessCell);
     });
 }
-
-placeTreasures();

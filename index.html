@@ -10,10 +10,16 @@
     <body>
         <h1>Webprogramozas Beadando - Gyarmati Andras - UY18CX</h1>
 
-        <div>hány játékos (1-4) -- alapértelmezetten 2</div>
-        <div>játékosonként hány kincskártya (1-(24/játékosok száma)) -- alapértelmezetten 2</div>
-        <button id="grid-button" onclick="showGrid()">Egy start gomb megnyomásával megjelenik a játéktér.</button>
-        <button onclick="toggleManual()">Egy másik gomb megnyomásával a játék leírása jelenik meg.</button>
+        <div>
+            játékosok: <span id="player-count">2</span
+            ><input type="range" name="player-count-range" id="player-count-range" value="2" min="1" max="4"/>
+        </div>
+        <div>
+            játékosonkénti kincskártya: <span id="treasure-count">2</span
+            ><input type="range" name="treasure-count-range" id="treasure-count-range" value="2" min="1" max="4"/>
+        </div>
+        <button id="grid-button" onclick="showGrid()">start</button>
+        <button onclick="toggleManual()">a játék leírása</button>
         <div id="manual">
             A katakomba szobáit egy 7x7-es négyzetrács cellái jelképezik. Minden szobában adott, hogy hány falán van
             ajtó. Ha két szomszédos szoba érintkező falán egy-egy ajtó van, akkor át lehet menni egyik szobából a
