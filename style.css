@@ -42,14 +42,6 @@ body {
     -webkit-transition: all 0.3s ease;
 }
 
-#manual {
-    display: none;
-}
-
-#grid {
-    display: block; /* none */
-}
-
 .path-cell {
     background-color: rgb(101, 156, 119);
 }
@@ -114,7 +106,10 @@ body {
 }
 
 #winner {
-    display: none;
     color: yellow;
     font-size: large;
+}
+
+.hidden {
+    display: none;
 }

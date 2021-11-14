@@ -10,30 +10,34 @@
     <body>
         <h1>Webprogramozas Beadando - Gyarmati Andras - UY18CX</h1>
 
-        <div>
-            játékosok: <span id="player-count">2</span
-            ><input type="range" name="player-count-range" id="player-count-range" value="2" min="1" max="4"/>
-        </div>
-        <div>
-            játékosonkénti kincskártya: <span id="treasure-count">2</span
-            ><input type="range" name="treasure-count-range" id="treasure-count-range" value="2" min="1" max="4"/>
-        </div>
-        <button id="grid-button" onclick="showGrid()">start</button>
-        <button onclick="toggleManual()">a játék leírása</button>
-        <div id="manual">
-            A katakomba szobáit egy 7x7-es négyzetrács cellái jelképezik. Minden szobában adott, hogy hány falán van
-            ajtó. Ha két szomszédos szoba érintkező falán egy-egy ajtó van, akkor át lehet menni egyik szobából a
-            másikba. A négyzetrács páros sorait és oszlopait el lehet tolni, a többi szoba végig rögzített a játék
-            során. Az eltolásokkal az ajtókon keresztül utak nyílnak a szobák között, így lehet eljutni a kincsekhez.
-            Mindegyik kérő arra törekszik, hogy a katakomba szobáinak ötletes eltolásával eljusson a kincsekhez. Aki
-            elsőként találja meg mindahányat és kiindulópontjára sikeresen visszaérkezik az a nyertes.
+        <div id="menu">
+            <div>
+                játékosok: <span id="player-count">2</span
+                ><input type="range" name="player-count-range" id="player-count-range" value="2" min="1" max="4" />
+            </div>
+            <div>
+                játékosonkénti kincskártya: <span id="treasure-count">2</span
+                ><input type="range" name="treasure-count-range" id="treasure-count-range" value="2" min="1" max="4" />
+            </div>
+            <button id="grid-button" onclick="showGrid()">start</button>
+            <button onclick="toggleManual()">a játék leírása</button>
+            <div id="manual" class="hidden">
+                A katakomba szobáit egy 7x7-es négyzetrács cellái jelképezik. Minden szobában adott, hogy hány falán van
+                ajtó. Ha két szomszédos szoba érintkező falán egy-egy ajtó van, akkor át lehet menni egyik szobából a
+                másikba. A négyzetrács páros sorait és oszlopait el lehet tolni, a többi szoba végig rögzített a játék
+                során. Az eltolásokkal az ajtókon keresztül utak nyílnak a szobák között, így lehet eljutni a
+                kincsekhez. Mindegyik kérő arra törekszik, hogy a katakomba szobáinak ötletes eltolásával eljusson a
+                kincsekhez. Aki elsőként találja meg mindahányat és kiindulópontjára sikeresen visszaérkezik az a
+                nyertes.
+            </div>
         </div>
 
-        <div id="game-state">
+        <div id="score-board" class="hidden">
             <div>current player: <span id="current-player"></span></div>
             <div>treasure to find: <span id="current-treasure"></span></div>
             <div>stat: <span id="stat"></span></div>
-            <div id="winner">WINNER: <span id="winner-name"></span></div>
+            <div id="winner" class="hidden">WINNER: <span id="winner-name"></span></div>
+            <button onclick="restart()">restart</button>
         </div>
         <div id="grid"></div>
 

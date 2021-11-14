@@ -61,7 +61,8 @@ document.querySelector("html").addEventListener("contextmenu", (e) => {
 });
 
 const cellSize = 85;
-const treasures = shuffle([...Array(24).keys()]).map((x) => new Treasure(x));
+const treasureCount = 24;
+let treasures = [];
 const gridEm = document.querySelector("#grid");
 const gridSize = 7;
 let initialGridData = [
@@ -73,7 +74,7 @@ let initialGridData = [
     ["0000", "0000", "0000", "0000", "0000", "0000", "0000"],
     ["1100", "0000", "1101", "0000", "1101", "0000", "1001"],
 ];
-let cellsToPlace = shuffle([
+let cellsToPlace = [
     "1101",
     "1010",
     "0011",
@@ -108,9 +109,9 @@ let cellsToPlace = shuffle([
     "0101",
     "1001",
     "0110",
-]);
+];
 
-let extraCell = new Cell(cellsToPlace.shift(), -1, -1);
+let extraCell = null;
 
 let playerCountRange = document.querySelector("#player-count-range");
 let treasureCountRange = document.querySelector("#treasure-count-range");
@@ -118,15 +119,15 @@ const playerCountSpan = document.querySelector("#player-count");
 const treasureCountSpan = document.querySelector("#treasure-count");
 
 let playerCount = 2;
-let treasureCount = 2;
+let treasureCountPerPlayer = 2;
 
-treasureCountRange.max = treasures.length / playerCount;
+treasureCountRange.max = treasureCount / playerCount;
 updateTreasureRange();
 
 playerCountRange.addEventListener("input", (e) => {
     playerCount = parseInt(e.target.value);
     playerCountSpan.innerHTML = playerCount;
-    treasureCountRange.max = treasures.length / playerCount;
+    treasureCountRange.max = treasureCount / playerCount;
     updateTreasureRange();
 });
 
@@ -137,6 +138,7 @@ let players = [];
 let corners = [];
 let pathCells = [];
 let cells = [];
+const menuEm = document.querySelector("#menu");
 const stateBoardTreasure = document.querySelector("#current-treasure");
 const stateBoardStat = document.querySelector("#stat");
 const stateBoardPlayer = document.querySelector("#current-player");
@@ -144,36 +146,36 @@ const winnerEm = document.querySelector("#winner");
 const winnerName = document.querySelector("#winner-name");
 let currentPlayer = null;
 
-
-// todo: make it replayable
-genCells();
-initCorners();
-initPlayers();
-drawGrid();
-updateStatDisplay();
-placeTreasures();
+function startGame() {
+    treasures = shuffle([...Array(24).keys()]).map((x) => new Treasure(x));
+    winnerEm.classList.add("hidden");
+    genCells();
+    initCorners();
+    initPlayers();
+    drawGrid();
+    updateStatDisplay();
+    placeTreasures();
+}
 
 function updateTreasureRange() {
-    treasureCount = treasureCountRange.value;
-    treasureCountSpan.innerHTML = treasureCount;
+    treasureCountPerPlayer = treasureCountRange.value;
+    treasureCountSpan.innerHTML = treasureCountPerPlayer;
 }
 
 function genCells() {
+    let shuffled = shuffle(cellsToPlace);
+    extraCell = new Cell(shuffled.shift(), -1, -1);
     for (let rowIndex = 0; rowIndex < initialGridData.length; rowIndex++) {
         let row = initialGridData[rowIndex];
         gridData[rowIndex] = [];
         for (let colIndex = 0; colIndex < row.length; colIndex++) {
             let cellCode = row[colIndex];
-            if (cellCode === "0000") cellCode = cellsToPlace.shift();
+            if (cellCode === "0000") cellCode = shuffled.shift();
             let cell = new Cell(cellCode, rowIndex, colIndex);
             gridData[rowIndex][colIndex] = cell;
             cells.push(cell);
         }
     }
-}
-
-function isFixed(x, y) {
-    return x % 2 == 0 && y % 2 == 0;
 }
 
 function moveCell(rowIndex, colIndex) {
@@ -268,8 +270,8 @@ function placePlayerOnCell(player, cell) {
 
 function checkIfPlayerWon(player) {
     if (player.treasures.every((x) => x.isFound) && player.cell == player.cornerCell) {
-        gridEm.style.display = "none";
-        winnerEm.style.display = "block";
+        gridEm.classList.add("hidden");
+        winnerEm.classList.remove("hidden");
         winnerName.innerHTML = player.name;
     }
 }
@@ -336,7 +338,6 @@ function showPath() {
     pathCells.forEach((x) => {
         x.cellEm.classList.add("path-cell");
         x.cellEm.addEventListener("click", pathCellClicked);
-        // maybe we should add the eventlistener to all cells and just check if it is a pathcell?
     });
 }
 
@@ -439,16 +440,24 @@ function drawGrid() {
 
 function toggleManual() {
     let el = document.querySelector("#manual");
-    if (el.style.display === "block") {
-        el.style.display = "none";
+    if (!el.classList.contains("hidden")) {
+        el.classList.add("hidden");
     } else {
-        el.style.display = "block";
+        el.classList.remove("hidden");
     }
 }
 
 function showGrid() {
-    document.querySelector("#grid").style.display = "block";
-    document.querySelector("#grid-button").disabled = "disabled";
+    document.querySelector("#grid").classList.remove("hidden");
+    document.querySelector("#score-board").classList.remove("hidden");
+    menuEm.classList.add("hidden");
+    startGame();
+}
+
+function restart() {
+    document.querySelector("#grid").classList.add("hidden");
+    document.querySelector("#score-board").classList.add("hidden");
+    document.querySelector("#menu").classList.remove("hidden");
 }
 
 function initCorner(num, rowIndex, colIndex) {
@@ -463,7 +472,7 @@ function initCorner(num, rowIndex, colIndex) {
 
 function initPlayers() {
     for (let i = 0; i < playerCount; i++) {
-        let player = new Player(treasures.slice(i * treasureCount, (i + 1) * treasureCount), i + 1);
+        let player = new Player(treasures.slice(i * treasureCountPerPlayer, (i + 1) * treasureCountPerPlayer), i + 1);
         placePlayerOnCell(player, corners[i]);
         player.cornerCell = corners[i];
         players.push(player);
@@ -510,15 +519,18 @@ function updateStatDisplay() {
 function executeEnd() {}
 
 function shuffle(arr) {
-    arr.sort(() => Math.random() - 0.5);
-    return arr;
+    let shuffled = [...arr];
+    shuffled.sort(() => Math.random() - 0.5);
+    return shuffled;
 }
 
 function placeTreasures() {
+    console.log(treasures);
     let shuffledCells = shuffle(cells);
     let dealedTreasures = treasures.filter((x) => x.isDealed);
     dealedTreasures.forEach((treasure) => {
         let treasurelessCell = shuffledCells.find((cell) => !cell.treasure && !corners.includes(cell));
         if (treasurelessCell) placeTreasureOnCell(treasure, treasurelessCell);
+        else console.log(treasurelessCell);
     });
 }
