@@ -62,7 +62,7 @@ document.querySelector("html").addEventListener("contextmenu", (e) => {
 
 const cellSize = 85;
 const treasureCount = 24;
-let treasures = [];
+let allTreasures = [];
 const gridEm = document.querySelector("#grid");
 const gridSize = 7;
 let initialGridData = [
@@ -147,7 +147,7 @@ const winnerName = document.querySelector("#winner-name");
 let currentPlayer = null;
 
 function startGame() {
-    treasures = shuffle([...Array(24).keys()]).map((x) => new Treasure(x));
+    allTreasures = shuffle([...Array(24).keys()]).map((x) => new Treasure(x));
     winnerEm.classList.add("hidden");
     genCells();
     initCorners();
@@ -186,12 +186,18 @@ function moveCell(rowIndex, colIndex) {
 }
 
 function arrowCellClicked(event) {
+    let cellEm = event.target;
+    if (cellEm.classList.contains("last-arrow-cell")) {
+        return;
+    }
     if (pathCells.length) activateNextPlayer();
     discardPathCells();
 
-    let cell = event.target;
-    let colIndex = parseInt(cell.dataset.colIndex);
-    let rowIndex = parseInt(cell.dataset.rowIndex);
+    document.querySelector(".last-arrow-cell")?.classList.remove("last-arrow-cell");
+
+    cellEm.classList.add("last-arrow-cell");
+    let colIndex = parseInt(cellEm.dataset.colIndex);
+    let rowIndex = parseInt(cellEm.dataset.rowIndex);
     let tmpCell;
     if (rowIndex == -1) {
         tmpCell = gridData[gridSize - 1][colIndex];
@@ -230,6 +236,9 @@ function arrowCellClicked(event) {
         moveCell(rowIndex, gridSize - 1);
         extraCell = tmpCell;
     }
+
+    moveExtraCellToCorner();
+    showPath();
 }
 
 function moveExtraCellToCorner() {
@@ -410,8 +419,6 @@ function createArrowCell(rowIndex, colIndex) {
     let cellEm = createCellEm(rowIndex, colIndex);
     cellEm.addEventListener("click", (e) => {
         arrowCellClicked(e);
-        moveExtraCellToCorner();
-        showPath();
     });
     cellEm.classList.add("arrow-cell");
     cellEm.addEventListener("contextmenu", (e) => {
@@ -472,7 +479,10 @@ function initCorner(num, rowIndex, colIndex) {
 
 function initPlayers() {
     for (let i = 0; i < playerCount; i++) {
-        let player = new Player(treasures.slice(i * treasureCountPerPlayer, (i + 1) * treasureCountPerPlayer), i + 1);
+        let player = new Player(
+            allTreasures.slice(i * treasureCountPerPlayer, (i + 1) * treasureCountPerPlayer),
+            i + 1
+        );
         placePlayerOnCell(player, corners[i]);
         player.cornerCell = corners[i];
         players.push(player);
@@ -488,7 +498,7 @@ function setActivePlayer(index) {
 }
 
 function setActiveTreasure(player) {
-    treasures.forEach((x) => x.treasureEm.classList.remove("active-treasure"));
+    allTreasures.forEach((x) => x.treasureEm.classList.remove("active-treasure"));
     let treasure = player.currentTreasure();
     if (treasure) treasure.treasureEm.classList.add("active-treasure");
 }
@@ -525,9 +535,8 @@ function shuffle(arr) {
 }
 
 function placeTreasures() {
-    console.log(treasures);
     let shuffledCells = shuffle(cells);
-    let dealedTreasures = treasures.filter((x) => x.isDealed);
+    let dealedTreasures = allTreasures.filter((x) => x.isDealed);
     dealedTreasures.forEach((treasure) => {
         let treasurelessCell = shuffledCells.find((cell) => !cell.treasure && !corners.includes(cell));
         if (treasurelessCell) placeTreasureOnCell(treasure, treasurelessCell);

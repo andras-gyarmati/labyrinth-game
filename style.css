@@ -50,6 +50,10 @@ body {
     background-color: rgb(99, 61, 80);
 }
 
+.last-arrow-cell {
+    background-color: rgb(141, 124, 132);
+}
+
 .player {
     width: 24px;
     height: 24px;
